@@ -36,7 +36,7 @@ function OnboardingStepNavBtns(props) {
         onClick={handleNext}
         className={classes.button}
       >
-        Next
+        Save & Continue
       </Button>
     </div>
   )

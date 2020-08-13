@@ -43,7 +43,9 @@ function OnboardingStepContent(props) {
         />
       </Route>
       <Route exact path="/review">
-        <OnboardingReviewStepContent />
+        <OnboardingReviewStepContent
+          handleBack={goBack}
+        />
       </Route>
       <Route exact path="/">
         <RedirectToBudget />

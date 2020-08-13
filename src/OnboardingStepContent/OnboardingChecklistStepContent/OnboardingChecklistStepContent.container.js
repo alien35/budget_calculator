@@ -9,6 +9,7 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
+import _ from 'lodash';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import ImageConstants from '../../constants/Image.constants';
@@ -24,6 +25,7 @@ import ApiService from '../../Services/Api.service';
 import endpointsConstants from '../../constants/endpoints.constants';
 import UserService from '../../Services/User.service';
 import ChecklistItemService from '../../Services/ChecklistItem.service';
+import checklistTypeToPrettyType from '../../constants/checklistTypeToPrettyType.constants';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -64,6 +66,7 @@ export default function OnboardingChecklistStepContent(props) {
 
   const [ items, setItems ] = React.useState({
     finishedFetched: false,
+    groupedResult: null,
     result: null
   })
 
@@ -76,40 +79,18 @@ export default function OnboardingChecklistStepContent(props) {
     } catch (err) {
       setItems({
         finishedFetching: true,
+        groupedResult: null,
         result: null
       });
       return alert(err.error);
     }
+    const deserializedResults = result.data.data.map((apiResult) => ChecklistItemService.deserialize(apiResult));
     setItems({
       finishedFetching: true,
-      result: result.data.data.map((apiResult) => ChecklistItemService.deserialize(apiResult))
+      groupedResult: _.groupBy(deserializedResults, 'type'),
+      result: deserializedResults
     })
-    console.log(result.data, 'data here dog');
-    
-    /*
-    let resultsSnapshot;
-    try {
-      resultsSnapshot = await db.collection("items").get();
-    } catch (err) {
-      alert('Something went wrong. Please try again later');
-    }
-
-    // Usually we'd have a service to deserialize/serialize content
-    // but let's leave it here for now.
-    const deserializedResults = [];
-    resultsSnapshot.forEach((snapshot) => {
-      const data = snapshot.data();
-      console.log(data, 'data here')
-      deserializedResults.push(new ChecklistItem(
-        snapshot.id,
-        data.type,
-        data.name,
-        data.lowPrice,
-        data.highPrice
-      ))
-    })
-    setItems(deserializedResults);
-    */
+  
   }
 
   console.log(items, 'items')
@@ -167,6 +148,7 @@ export default function OnboardingChecklistStepContent(props) {
   }
 
   const isOverBudget = () => {
+    console.log(selectedItemsMaxPrice(), 'hello', props.user.budget.max)
     return props.user.budget.max < selectedItemsMinPrice();
   }
 
@@ -206,32 +188,6 @@ export default function OnboardingChecklistStepContent(props) {
     // Looks like you can still afford more items!
   }
 
-  const groundCoverItems = () => {
-    return items.result.filter((item) => (item.type === 'GROUND_COVER'))
-  }
-
-  const lightingItems = () => {
-    return items.result.filter((item) => (item.type === 'LIGHTING'))
-  }
-
-  const fencingItems = () => {
-    return items.result.filter((item) => item.type === 'FENCING_AND_PRIVACY');
-  }
-
-  const waterFeatures = () => {
-    return items.result.filter((item) => item.type === 'WATER_FEATURES')
-  }
-
-  const structureItems = () => {
-    return items.result.filter((item) => item.type === 'STRUCTURES')
-  }
-
-  const deckItems = () => {
-    return items.result.filter((item) => item.type === 'DECK_MATERIAL')
-  }
-
-  console.log(items, 'items here man', items.finishedFetched);
-
   if (!items.finishedFetching) {
     return (
       <Backdrop className={classes.backdrop} open={true}>
@@ -252,102 +208,28 @@ export default function OnboardingChecklistStepContent(props) {
       </OnboardingStepSubtitle>
       <br />
       <br />
-      <Typography variant="h6" component="h1" className={classes.itemTypeTitle}>Ground Cover</Typography>
-      <Grid container spacing={3}>
-        {
-          groundCoverItems().map((item) => (
-            <React.Fragment key={item.id}>
-              <OnboardingChecklistStepContentItem
-                item={item}
-                isSelected={isItemSelected(item.id)}
-                onClick={() => onToggleIsSelected(item.id)}
-              />
-            </React.Fragment>
-          ))
-        }
-      </Grid>
-      <br />
-      <br />
-      <Typography variant="h6" component="h1" className={classes.itemTypeTitle}>Lighting</Typography>
-      <Grid container spacing={3}>
-        {
-          lightingItems().map((item) => (
-            <React.Fragment key={item.id}>
-              <OnboardingChecklistStepContentItem
-                item={item}
-                isSelected={isItemSelected(item.id)}
-                onClick={() => onToggleIsSelected(item.id)}
-              />
-            </React.Fragment>
-          ))
-        }
-      </Grid>
-      <br />
-      <br />
-      <Typography variant="h6" component="h1" className={classes.itemTypeTitle}>Fencing & Privacy</Typography>
-      <Grid container spacing={3}>
-        {
-          fencingItems().map((item) => (
-            <React.Fragment key={item.id}>
-              <OnboardingChecklistStepContentItem
-                item={item}
-                isSelected={isItemSelected(item.id)}
-                onClick={() => onToggleIsSelected(item.id)}
-              />
-            </React.Fragment>
-          ))
-        }
-      </Grid>
-      <br />
-      <br />
-      <Typography variant="h6" component="h1" className={classes.itemTypeTitle}>Water Features</Typography>
-      <Grid container spacing={3}>
-        {
-          waterFeatures().map((item) => (
-            <React.Fragment key={item.id}>
-              <OnboardingChecklistStepContentItem
-                item={item}
-                isSelected={isItemSelected(item.id)}
-                onClick={() => onToggleIsSelected(item.id)}
-              />
-            </React.Fragment>
-          ))
-        }
-      </Grid>
-      <br />
-      <br />
-      <Typography variant="h6" component="h1" className={classes.itemTypeTitle}>Structures</Typography>
-      <Grid container spacing={3}>
-        {
-          structureItems().map((item) => (
-            <React.Fragment key={item.id}>
-              <OnboardingChecklistStepContentItem
-                item={item}
-                isSelected={isItemSelected(item.id)}
-                onClick={() => onToggleIsSelected(item.id)}
-              />
-            </React.Fragment>
-          ))
-        }
-      </Grid>
-      <br />
-      <br />
-      <Typography variant="h6" component="h1" className={classes.itemTypeTitle}>Deck Materials</Typography>
-      <Grid container spacing={3}>
-        {
-          deckItems().map((item) => (
-            <React.Fragment key={item.id}>
-              <OnboardingChecklistStepContentItem
-                item={item}
-                isSelected={isItemSelected(item.id)}
-                onClick={() => onToggleIsSelected(item.id)}
-              />
-            </React.Fragment>
-          ))
-        }
-      </Grid>
-      <br />
-      <br />
+      {
+        Object.keys(items.groupedResult).map((key) => (
+          <React.Fragment key={key}>
+            <Typography variant="h6" component="h1" className={classes.itemTypeTitle}>{checklistTypeToPrettyType[key]}</Typography>
+            <Grid container spacing={3}>
+              {
+                items.groupedResult[key].map((item) => (
+                  <React.Fragment key={item.id}>
+                    <OnboardingChecklistStepContentItem
+                      item={item}
+                      isSelected={isItemSelected(item.id)}
+                      onClick={() => onToggleIsSelected(item.id)}
+                    />
+                  </React.Fragment>
+                ))
+              }
+            </Grid>
+            <br />
+            <br />
+          </React.Fragment>
+        ))
+      }
       <Typography variant="h6" component="h1" className={classes.instructions}>Your budget range: {props.user.budget.prettyMin()} - {props.user.budget.prettyMax()}</Typography>
       {
         selectedItems.length && (
