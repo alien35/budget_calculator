@@ -1,5 +1,4 @@
 import React from 'react';
-import Typography from '@material-ui/core/Typography';
 import OnboardingStepTitle from '../../Shared/OnboardingStep/OnboardingStepTitle.component';
 import OnboardingStepSubtitle from '../../Shared/OnboardingStep/OnboardingStepSubtitle.component';
 import OnboardingStepNavBtnsComponent from '../../Shared/OnboardingStep/OnboardingStepNavBtns.component';

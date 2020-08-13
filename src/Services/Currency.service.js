@@ -10,10 +10,11 @@ function convertToDollars(input) {
     // in the UI
     return input;
   }
-  return (input / 100).toLocaleString('en-US', {
+  // Here we are adding the negative value to our prettified dollar amount
+  return `${input < 0 ? '-' : ''}${(Math.abs(input) / 100).toLocaleString('en-US', {
     style: 'currency',
     currency: 'USD',
-  });
+  })}`;
 
 }
 

@@ -54,7 +54,6 @@ export default function HomeContainer(props) {
       });
       return alert(err.error);
     }
-    console.log(result.data, 'data here');
     setUser({
       finishedFetching: true,
       result: UserService.deserialize(result.data.data)

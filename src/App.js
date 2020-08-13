@@ -1,5 +1,4 @@
 import React  from 'react';
-import "firebase/firestore";
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import './App.css';
 import HomeContainer from './Home/Home.container';

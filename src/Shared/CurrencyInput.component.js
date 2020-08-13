@@ -1,4 +1,4 @@
-import React, { CSSProperties, FC, KeyboardEvent, useCallback } from 'react';
+import React from 'react';
 import TextField from '@material-ui/core/TextField';
 import CurrencyService from '../Services/Currency.service';
 
@@ -18,7 +18,7 @@ const CurrencyInput = ({
   if (value !== valueAbsTrunc || !Number.isFinite(value) || Number.isNaN(value)) {
     throw new Error(`invalid value property`);
   }
-  const handleKeyDown = useCallback(
+  const handleKeyDown = React.useCallback(
     (e) => {
       const { key, keyCode } = e;
       if (
@@ -43,7 +43,7 @@ const CurrencyInput = ({
     },
     [max, onValueChange, value]
   );
-  const handleChange = useCallback(() => {
+  const handleChange = React.useCallback(() => {
     // DUMMY TO AVOID REACT WARNING
   }, []);
 

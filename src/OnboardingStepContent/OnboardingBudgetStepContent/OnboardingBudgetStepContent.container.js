@@ -1,12 +1,8 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import OnboardingStepTitle from '../../Shared/OnboardingStep/OnboardingStepTitle.component';
 import OnboardingStepSubtitle from '../../Shared/OnboardingStep/OnboardingStepSubtitle.component';
-import TextField from '@material-ui/core/TextField';
 import OnboardingStepNavBtns from '../../Shared/OnboardingStep/OnboardingStepNavBtns.component';
-import * as firebase from 'firebase/app';
-import CurrencyService from '../../Services/Currency.service';
 import CurrencyInput from '../../Shared/CurrencyInput.component';
 import ApiService from '../../Services/Api.service';
 import endpointsConstants from '../../constants/endpoints.constants';
@@ -28,9 +24,6 @@ const MAX_ALLOWED = 100000000000;
 
 export default function OnboardingBudgetStepContent(props) {
 
-  const [ db ] = React.useState(firebase.firestore());
-  const [ validMin, setValidMin ] = React.useState(true);
-  const [ validMax, setValidMax ] = React.useState(true);
   const [ min, setMin ] = React.useState(props.user.budget.min);
   const [ max, setMax ] = React.useState(props.user.budget.max);
   
@@ -43,31 +36,6 @@ export default function OnboardingBudgetStepContent(props) {
   const onMaxChange = React.useCallback(val => {
     setMax(val);
   }, []);
-
-  const canGoNext = () => {
-    if (!validMin) {
-      return false;
-    }
-    if (!validMax) {
-      return false;
-    }
-    return true;
-  }
-
-  const getHelperText = (which) => {
-    const invalidNumberMessage = 'Enter a valid number';
-    console.log('fetching text');
-    switch (which) {
-      case 'min': {
-        return validMin ? '' : invalidNumberMessage;
-      }
-      case 'max': {
-        return validMax ? '' : invalidNumberMessage;
-      }
-      default:
-        return ''
-    }
-  }
 
   const storeInDB = async (min, max) => {
     try {
@@ -121,7 +89,7 @@ export default function OnboardingBudgetStepContent(props) {
       <br />
       <br />
       <OnboardingStepNavBtns
-        canGoNext={canGoNext()}
+        canGoNext={true}
         handleNext={onComplete}
         canGoBack={false}
       />
