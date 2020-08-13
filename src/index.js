@@ -8,13 +8,14 @@ import seeds from './seeds';
 
 firebase.initializeApp(
    {
-    apiKey: "AIzaSyD7NUVfrImccSo8FuCBG7bXVk0oLFqgE-k",
-    authDomain: "yardzen-demo.firebaseapp.com",
-    databaseURL: "https://yardzen-demo.firebaseio.com",
-    projectId: "yardzen-demo",
-    storageBucket: "yardzen-demo.appspot.com",
-    messagingSenderId: "509183652730",
-    appId: "1:509183652730:web:ba2208f7d8e0882f009cc3"
+    apiKey: "AIzaSyBPnC-bnE0qWW1hi9-7Xbuk2OChS5nTdF4",
+    authDomain: "yardzen-c322c.firebaseapp.com",
+    databaseURL: "https://yardzen-c322c.firebaseio.com",
+    projectId: "yardzen-c322c",
+    storageBucket: "yardzen-c322c.appspot.com",
+    messagingSenderId: "825942882661",
+    appId: "1:825942882661:web:c97879807d4a406e3e498c",
+    measurementId: "G-2TJ5G5DG93"
   }
 )
 
