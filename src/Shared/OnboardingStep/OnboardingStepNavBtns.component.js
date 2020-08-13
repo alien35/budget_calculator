@@ -16,20 +16,12 @@ function OnboardingStepNavBtns(props) {
   const classes = useStyles();
 
   const handleBack = () => {
-    switch (props.activeStep) {
-      case 'checklist': {
-        return props.history.push(StepsService.getSteps()[0].path);
-      }
-      case 'review': {
-        return props.history.push(StepsService.getSteps()[1].path);
-      }
-    }
+    props.handleBack();
     
   };
 
   const handleNext = () => {
     props.handleNext();
-    props.history.push(StepsService.getSteps()[1].path);
   }
 
   return (

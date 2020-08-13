@@ -5,20 +5,41 @@ import OnboardingReviewStepContent from './OnboardingReviewStepContent/Onboardin
 import { Switch, Route } from "react-router-dom";
 import RedirectToBudget from './RedirectToBudget.component';
 import OnboardingStep404 from './OnboardingStep404/OnboardingStep404.component';
+import { withRouter } from 'react-router-dom';
+import StepsService from '../Services/Steps.service';
 
-export default function OnboardingStepContent(props) {
+function OnboardingStepContent(props) {
+
+  console.log(props.history.location, 'props.history.location')
+
+  const proceedToNext = () => {
+    const currentStage = props.history.location.pathname;
+    const allSteps = StepsService.getSteps();
+    const currentStageIndex = allSteps.map((step) => step.path).indexOf(currentStage);
+    props.history.push(allSteps[currentStageIndex + 1].path);
+  }
+
+  const goBack = () => {
+    const currentStage = props.history.location.pathname;
+    const allSteps = StepsService.getSteps();
+    const currentStageIndex = allSteps.map((step) => step.path).indexOf(currentStage);
+    props.history.push(allSteps[currentStageIndex - 1].path);
+  }
 
   return (
     <Switch>
       <Route exact path="/budget">
         <OnboardingBudgetStepContent
-          minMaxBudget={props.minMaxBudget}
-          onCompleteBudget={props.onCompleteBudget}
+          user={props.user}
+          goBack={goBack}
+          onComplete={proceedToNext}
         />
       </Route>
       <Route exact path="/checklist">
         <OnboardingChecklistStepContent
-          minMaxBudget={props.minMaxBudget}
+          handleBack={goBack}
+          onComplete={proceedToNext}
+          user={props.user}
         />
       </Route>
       <Route exact path="/review">
@@ -34,3 +55,5 @@ export default function OnboardingStepContent(props) {
   )
 
 }
+
+export default withRouter(OnboardingStepContent);

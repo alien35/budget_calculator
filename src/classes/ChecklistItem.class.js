@@ -1,4 +1,5 @@
 import ImageConstants from "../constants/Image.constants";
+import CurrencyService from "../Services/Currency.service";
 
 export default class ChecklistItem {
   constructor(id, type, name, lowPrice, highPrice) {
@@ -14,6 +15,6 @@ export default class ChecklistItem {
   }
 
   prettyPriceRange() {
-    return `$${this.lowPrice.toFixed(2)} - $${this.highPrice.toFixed(2)}`;
+    return `${CurrencyService.convertToDollars(this.lowPrice)} - ${CurrencyService.convertToDollars(this.highPrice)}`;
   }
 }

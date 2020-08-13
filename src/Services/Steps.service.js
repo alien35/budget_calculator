@@ -1,13 +1,13 @@
 function getSteps() {
   return [{
     name: 'Budget',
-    path: 'budget'
+    path: '/budget'
   }, {
     name: 'Checklist',
-    path: 'checklist'
+    path: '/checklist'
   }, {
     name: 'Review',
-    path: 'review'
+    path: '/review'
   }];
 }
 

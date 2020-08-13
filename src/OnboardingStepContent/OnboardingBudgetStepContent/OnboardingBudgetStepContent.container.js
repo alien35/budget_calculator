@@ -6,6 +6,12 @@ import OnboardingStepSubtitle from '../../Shared/OnboardingStep/OnboardingStepSu
 import TextField from '@material-ui/core/TextField';
 import OnboardingStepNavBtns from '../../Shared/OnboardingStep/OnboardingStepNavBtns.component';
 import * as firebase from 'firebase/app';
+import CurrencyService from '../../Services/Currency.service';
+import CurrencyInput from '../../Shared/CurrencyInput.component';
+import ApiService from '../../Services/Api.service';
+import endpointsConstants from '../../constants/endpoints.constants';
+import UserService from '../../Services/User.service';
+import UserBudget from '../../classes/UserBudget.class';
 
 const useStyles = makeStyles((theme) => ({
   instructions: {
@@ -18,37 +24,25 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+const MAX_ALLOWED = 100000000000;
+
 export default function OnboardingBudgetStepContent(props) {
 
   const [ db ] = React.useState(firebase.firestore());
   const [ validMin, setValidMin ] = React.useState(true);
   const [ validMax, setValidMax ] = React.useState(true);
-  const [ min, setMin ] = React.useState(props.minMaxBudget[0]);
-  const [ max, setMax ] = React.useState(props.minMaxBudget[1]);
+  const [ min, setMin ] = React.useState(props.user.budget.min);
+  const [ max, setMax ] = React.useState(props.user.budget.max);
   
   const classes = useStyles();
 
-  const onMinChange = (e) => {
-    // Note, this does not account for pennies, so 23.22
-    const numberInput = parseInt(e.target.value, 10);
-    if (isNaN(numberInput)) {
-      return setValidMin(false);
-    }
-    console.log(numberInput, 'num input')
-    setMin(numberInput);
-    setValidMin(true);
-  }
+  const onMinChange = React.useCallback(val => {
+    setMin(val);
+  }, []);
 
-  const onMaxChange = (e) => {
-    // Note, this does not account for pennies, so 23.22
-    const numberInput = parseInt(e.target.value, 10);
-    if (isNaN(numberInput)) {
-      return setValidMax(false);
-    }
-    console.log(numberInput, 'max in')
-    setMax(numberInput);
-    setValidMax(true);
-  }
+  const onMaxChange = React.useCallback(val => {
+    setMax(val);
+  }, []);
 
   const canGoNext = () => {
     if (!validMin) {
@@ -76,17 +70,14 @@ export default function OnboardingBudgetStepContent(props) {
   }
 
   const storeInDB = async (min, max) => {
-    // Here we are hard-coding user ID. Usually this
-    // is done programatically in the authentication/authorization process
-    var userRef = db.collection('user').doc('PDkodzyofSCKEudyzKSu');
-
     try {
-      await userRef.set({
-          maxBudget: max,
-          minBudget: min
-      }, { merge: true });
+      props.user.budget = new UserBudget(min, max);
+      await ApiService.post({
+        endpoint: `${endpointsConstants.BASE_URL}/user`,
+        payload: UserService.serialize(props.user)
+      })
     } catch (err) {
-      throw new Error();
+      throw new Error(err);
     }
   }
 
@@ -94,10 +85,11 @@ export default function OnboardingBudgetStepContent(props) {
     try {
       await storeInDB(min, max);
     } catch (err) {
+      console.log(err, 'err here')
       alert('Something went wrong. Please try again later');
       return;
     }
-    props.onCompleteBudget(min, max);
+    props.onComplete();
   }
 
   return (
@@ -111,8 +103,20 @@ export default function OnboardingBudgetStepContent(props) {
       <br />
       <br />
       <div className={classes.minMaxInputs}>
-        <TextField className={classes.textField} variant="outlined" onChange={onMinChange} error={!validMin} helperText={() => getHelperText('min')} label="Min" defaultValue={min} />
-        <TextField className={classes.textField} variant="outlined" onChange={onMaxChange} error={!validMax} helperText={() => getHelperText('max')} label="Max" defaultValue={max} />
+        <CurrencyInput
+          className={classes.textField}
+          label="Min"
+          max={MAX_ALLOWED}
+          onValueChange={onMinChange}
+          value={min}
+        />
+        <CurrencyInput
+          className={classes.textField}
+          label="Max"
+          max={MAX_ALLOWED}
+          onValueChange={onMaxChange}
+          value={max}
+        />
       </div>
       <br />
       <br />

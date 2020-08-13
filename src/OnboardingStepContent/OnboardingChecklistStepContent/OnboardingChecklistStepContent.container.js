@@ -19,6 +19,11 @@ import OnboardingChecklistStepContentItem from './OnboardingChecklistStepContent
 import OnboardingStepNavBtns from '../../Shared/OnboardingStep/OnboardingStepNavBtns.component';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import CurrencyService from '../../Services/Currency.service';
+import ApiService from '../../Services/Api.service';
+import endpointsConstants from '../../constants/endpoints.constants';
+import UserService from '../../Services/User.service';
+import ChecklistItemService from '../../Services/ChecklistItem.service';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -52,27 +57,49 @@ export default function OnboardingChecklistStepContent(props) {
   const classes = useStyles();
 
   const [ db ] = React.useState(firebase.firestore());
-  const [ items, setItems ] = React.useState([]);
-  const [ finishedFetched, setFinishedFetching ] = React.useState(false);
 
+  console.log(props.user.selectedItems, 'props.user.selectedItems')
   // track selection by ID
-  const [ selectedItems, setSelectedItems ] = React.useState([]);
+  const [ selectedItems, setSelectedItems ] = React.useState(props.user.selectedItems);
+
+  const [ items, setItems ] = React.useState({
+    finishedFetched: false,
+    result: null
+  })
 
   const fetchItems = async () => {
+    let result;
+    try {
+      result = await ApiService.get({
+        endpoint: `${endpointsConstants.BASE_URL}/items`
+      });
+    } catch (err) {
+      setItems({
+        finishedFetching: true,
+        result: null
+      });
+      return alert(err.error);
+    }
+    setItems({
+      finishedFetching: true,
+      result: result.data.data.map((apiResult) => ChecklistItemService.deserialize(apiResult))
+    })
+    console.log(result.data, 'data here dog');
+    
+    /*
     let resultsSnapshot;
     try {
       resultsSnapshot = await db.collection("items").get();
     } catch (err) {
-      setFinishedFetching(true);
       alert('Something went wrong. Please try again later');
     }
-    setFinishedFetching(true);
 
     // Usually we'd have a service to deserialize/serialize content
     // but let's leave it here for now.
     const deserializedResults = [];
     resultsSnapshot.forEach((snapshot) => {
       const data = snapshot.data();
+      console.log(data, 'data here')
       deserializedResults.push(new ChecklistItem(
         snapshot.id,
         data.type,
@@ -82,6 +109,7 @@ export default function OnboardingChecklistStepContent(props) {
       ))
     })
     setItems(deserializedResults);
+    */
   }
 
   console.log(items, 'items')
@@ -104,23 +132,46 @@ export default function OnboardingChecklistStepContent(props) {
   }
 
   const selectedItemsMinPrice = () => {
-    return selectedItems.map((itemID) => items.find((item) => item.id === itemID)).reduce((sum, each) => sum + each.lowPrice, 0);
+    return selectedItems.map((itemID) => items.result.find((item) => item.id === itemID)).reduce((sum, each) => sum + each.lowPrice, 0);
   }
 
   const selectedItemsMaxPrice = () => {
-    return selectedItems.map((itemID) => items.find((item) => item.id === itemID)).reduce((sum, each) => sum + each.highPrice, 0);
+    return selectedItems.map((itemID) => items.result.find((item) => item.id === itemID)).reduce((sum, each) => sum + each.highPrice, 0);
   }
 
   const selectedItemsPriceRange = () => {
-    return `$${selectedItemsMinPrice().toFixed(2)} - $${selectedItemsMaxPrice().toFixed(2)}`
+    return `${CurrencyService.convertToDollars(selectedItemsMinPrice())} - ${CurrencyService.convertToDollars(selectedItemsMaxPrice())}`
   }
 
-  const onComplete = () => {
+  const storeInDB = async (selectedItems) => {
+    try {
+      props.user.selectedItems = selectedItems;
+      await ApiService.post({
+        endpoint: `${endpointsConstants.BASE_URL}/user`,
+        payload: UserService.serialize(props.user)
+      })
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
 
+  const onComplete = async () => {
+    try {
+      await storeInDB(selectedItems);
+    } catch (err) {
+      console.log(err, 'err here')
+      alert('Something went wrong. Please try again later');
+      return;
+    }
+    props.onComplete();
   }
 
   const isOverBudget = () => {
-    return props.minMaxBudget[1] < selectedItemsMinPrice();
+    return props.user.budget.max < selectedItemsMinPrice();
+  }
+
+  const isUnderBudget = () => {
+    return props.user.budget.min > selectedItemsMaxPrice();
   }
 
   const canGoNext = () => {
@@ -134,6 +185,15 @@ export default function OnboardingChecklistStepContent(props) {
   }
 
   const getBudgetHelperText = () => {
+    if (!selectedItems.length) {
+      return (
+        <>
+          <Typography variant="h6" component="h1" className={classes.overBudgetMessage}>Please select at least one item before continuing.</Typography>
+          <br />
+          <br />
+        </>
+      )
+    }
     if (isOverBudget()) {
       return (
         <>
@@ -143,41 +203,44 @@ export default function OnboardingChecklistStepContent(props) {
         </>
       )
     }
+    // Looks like you can still afford more items!
   }
 
   const groundCoverItems = () => {
-    return items.filter((item) => (item.type === 'GROUND_COVER'))
+    return items.result.filter((item) => (item.type === 'GROUND_COVER'))
   }
 
   const lightingItems = () => {
-    return items.filter((item) => (item.type === 'LIGHTING'))
+    return items.result.filter((item) => (item.type === 'LIGHTING'))
   }
 
   const fencingItems = () => {
-    return items.filter((item) => item.type === 'FENCING_AND_PRIVACY');
+    return items.result.filter((item) => item.type === 'FENCING_AND_PRIVACY');
   }
 
   const waterFeatures = () => {
-    return items.filter((item) => item.type === 'WATER_FEATURES')
+    return items.result.filter((item) => item.type === 'WATER_FEATURES')
   }
 
   const structureItems = () => {
-    return items.filter((item) => item.type === 'STRUCTURES')
+    return items.result.filter((item) => item.type === 'STRUCTURES')
   }
 
   const deckItems = () => {
-    return items.filter((item) => item.type === 'DECK_MATERIAL')
+    return items.result.filter((item) => item.type === 'DECK_MATERIAL')
   }
 
-  if (!finishedFetched) {
+  console.log(items, 'items here man', items.finishedFetched);
+
+  if (!items.finishedFetching) {
     return (
-      <div>
-        <Backdrop className={classes.backdrop} open={true}>
-          <CircularProgress color="inherit" />
-        </Backdrop>
-      </div>
+      <Backdrop className={classes.backdrop} open={true}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
     )
   }
+
+  console.log('not in the way here')
 
   return (
     <div className={classes.container}>
@@ -285,8 +348,12 @@ export default function OnboardingChecklistStepContent(props) {
       </Grid>
       <br />
       <br />
-      <Typography variant="h6" component="h1" className={classes.instructions}>Your budget range: ${props.minMaxBudget[0]} - ${props.minMaxBudget[1]}</Typography>
-      <Typography variant="h6" component="h1" className={classes.instructions}>Price range for your selection: {selectedItemsPriceRange()}</Typography>
+      <Typography variant="h6" component="h1" className={classes.instructions}>Your budget range: {props.user.budget.prettyMin()} - {props.user.budget.prettyMax()}</Typography>
+      {
+        selectedItems.length && (
+          <Typography variant="h6" component="h1" className={classes.instructions}>Price range for your selection: {selectedItemsPriceRange()}</Typography>
+        )
+      }
       <br />
       <br />
       {
@@ -295,6 +362,7 @@ export default function OnboardingChecklistStepContent(props) {
       <OnboardingStepNavBtns
         canGoNext={canGoNext()}
         activeStep="checklist"
+        handleBack={props.handleBack}
         handleNext={onComplete}
         canGoBack={true}
       />
