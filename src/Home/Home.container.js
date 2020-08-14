@@ -9,6 +9,7 @@ import UserService from '../Services/User.service';
 import Loading from '../Shared/Loading.component';
 import endpointsConstants from '../constants/endpoints.constants';
 import { withRouter } from 'react-router-dom';
+import ChecklistItemService from '../Services/ChecklistItem.service';
 
 const useStyles = makeStyles((theme) => ({
   contentWrapper: {
@@ -29,16 +30,29 @@ const getActiveStep = (currentStage) => {
 }
 
 function HomeContainer(props) {
+  const classes = useStyles();
+
+  const steps = StepsService.getSteps().map((step) => step.name);
+
 
   const [ user, setUser ] = React.useState({
     finishedFetching: false,
     result: null
   });
+
   const [ activeStep, setActiveStep ] = React.useState(getActiveStep(props.history.location.pathname));
+
+  const [ items, setItems ] = React.useState({
+    finishedFetching: false,
+    result: null
+  });
 
   React.useEffect(() => {
     if (!user.finishedFetching) {
       fetchUser();
+    }
+    if (!items.finishedFetching) {
+      fetchItems();
     }
     setActiveStep(getActiveStep(props.history.location.pathname));
   }, [props.history.location.pathname])
@@ -62,11 +76,35 @@ function HomeContainer(props) {
     });
   }
 
-  const steps = StepsService.getSteps().map((step) => step.name);
+  const fetchItems = async () => {
+    let result;
+    try {
+      result = await ApiService.get({
+        endpoint: `${endpointsConstants.BASE_URL}/items`
+      });
+    } catch (err) {
+      setItems({
+        finishedFetching: true,
+        result: null
+      });
+      return alert(err.error);
+    }
+    const deserializedResults = result.data.data.map((apiResult) => ChecklistItemService.deserialize(apiResult));
+    setItems({
+      finishedFetching: true,
+      result: deserializedResults
+    })
+  
+  }
 
-  const classes = useStyles();
 
   if (!user.finishedFetching) {
+    return (
+      <Loading />
+    )
+  }
+
+  if (!items.finishedFetching) {
     return (
       <Loading />
     )
@@ -91,6 +129,7 @@ function HomeContainer(props) {
           />
           <OnboardingStepContent
             user={user.result}
+            items={items.result}
             steps={steps}
           />
         </div>

@@ -49,63 +49,22 @@ export default function OnboardingChecklistStepContent(props) {
   // track selection by ID
   const [ selectedItems, setSelectedItems ] = React.useState(props.user.selectedItems);
   const [ isLoading, setIsLoading ] = React.useState(false);
- 
-  const [ items, setItems ] = React.useState({
-    finishedFetched: false,
-    groupedResult: null,
-    result: null
-  })
-
-  const fetchItems = async () => {
-    let result;
-    try {
-      result = await ApiService.get({
-        endpoint: `${endpointsConstants.BASE_URL}/items`
-      });
-    } catch (err) {
-      setItems({
-        finishedFetching: true,
-        groupedResult: null,
-        result: null
-      });
-      return alert(err.error);
-    }
-    const deserializedResults = result.data.data.map((apiResult) => ChecklistItemService.deserialize(apiResult));
-    setItems({
-      finishedFetching: true,
-      groupedResult: _.groupBy(deserializedResults, 'type'),
-      result: deserializedResults
-    })
-  
-  }
-
-  React.useState(() => {
-    fetchItems();
-  }, [])
+  const [ groupedItems ] = React.useState(_.groupBy(props.items, 'type'));
 
   const onToggleIsSelected = (id) => {
     const isSelected = selectedItems.indexOf(id) > -1;
+    let newSelectedItems;
     if (!isSelected) {
-      setSelectedItems(() => [...selectedItems, id])
+      newSelectedItems = [...selectedItems, id];
     } else {
-      setSelectedItems(() => selectedItems.filter((itemID) => itemID !== id))
+      newSelectedItems = selectedItems.filter((itemID) => itemID !== id);
     }
+    props.user.selectedItems = newSelectedItems;
+    setSelectedItems(newSelectedItems)
   }
 
   const isItemSelected = (id) => {
     return selectedItems.indexOf(id) > -1;
-  }
-
-  const selectedItemsMinPrice = () => {
-    return selectedItems.map((itemID) => items.result.find((item) => item.id === itemID)).reduce((sum, each) => sum + each.lowPrice, 0);
-  }
-
-  const selectedItemsMaxPrice = () => {
-    return selectedItems.map((itemID) => items.result.find((item) => item.id === itemID)).reduce((sum, each) => sum + each.highPrice, 0);
-  }
-
-  const selectedItemsPriceRange = () => {
-    return `${CurrencyService.convertToDollars(selectedItemsMinPrice())} - ${CurrencyService.convertToDollars(selectedItemsMaxPrice())}`
   }
 
   const storeInDB = async (selectedItems) => {
@@ -133,11 +92,11 @@ export default function OnboardingChecklistStepContent(props) {
   }
 
   const isOverBudget = () => {
-    return props.user.budget.max < selectedItemsMinPrice();
+    return props.user.budget.max < props.user.selectedItemsMinPrice(props.items);
   }
 
   const isUnderBudget = () => {
-    return props.user.budget.min > selectedItemsMaxPrice();
+    return props.user.budget.min > props.user.selectedItemsMaxPrice(props.items);
   }
 
   const canGoNext = () => {
@@ -161,7 +120,7 @@ export default function OnboardingChecklistStepContent(props) {
     if (isOverBudget()) {
       return (
         <OnboardingStepChecklistAlert>
-          You are over-budget. Please consider either removing some items or adjusting your budget range.
+          You are over budget. Please consider either removing some items or adjusting your budget range ({props.user.budget.prettyMin()} - {props.user.budget.prettyMax()}).
         </OnboardingStepChecklistAlert>
       )
     }
@@ -172,12 +131,6 @@ export default function OnboardingChecklistStepContent(props) {
         </OnboardingStepChecklistAlert>
       )
     }
-  }
-
-  if (!items.finishedFetching) {
-    return (
-      <Loading />
-    )
   }
 
   if (isLoading) {
@@ -198,12 +151,12 @@ export default function OnboardingChecklistStepContent(props) {
       <br />
       <br />
       {
-        Object.keys(items.groupedResult).map((key) => (
+        Object.keys(groupedItems).map((key) => (
           <React.Fragment key={key}>
             <Typography variant="h6" component="h1" className={classes.itemTypeTitle}>{checklistTypeToPrettyType[key]}</Typography>
             <Grid container spacing={3}>
               {
-                items.groupedResult[key].map((item) => (
+                groupedItems[key].map((item) => (
                   <React.Fragment key={item.id}>
                     <OnboardingChecklistStepContentItem
                       item={item}
@@ -219,10 +172,9 @@ export default function OnboardingChecklistStepContent(props) {
           </React.Fragment>
         ))
       }
-      <Typography variant="h6" component="h1" className={classes.bottomText}>Your budget range: {props.user.budget.prettyMin()} - {props.user.budget.prettyMax()}</Typography>
       {
         selectedItems.length ? (
-          <Typography variant="h6" component="h1" className={classes.bottomText}>Price range for your selection: {selectedItemsPriceRange()}</Typography>
+          <Typography variant="h6" component="h1" className={classes.bottomText}>Estimate: {props.user.prettySelectedItemsPriceRange(props.items)}</Typography>
         ) : <div />
       }
       <br />

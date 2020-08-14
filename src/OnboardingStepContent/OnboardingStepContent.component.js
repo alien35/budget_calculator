@@ -37,6 +37,7 @@ function OnboardingStepContent(props) {
       <Route exact path="/checklist">
         <OnboardingChecklistStepContent
           handleBack={goBack}
+          items={props.items}
           isLoading={props.isLoading}
           onComplete={proceedToNext}
           user={props.user}
@@ -44,6 +45,8 @@ function OnboardingStepContent(props) {
       </Route>
       <Route exact path="/review">
         <OnboardingReviewStepContent
+          user={props.user}
+          items={props.items}
           handleBack={goBack}
         />
       </Route>
