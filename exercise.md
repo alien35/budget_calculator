@@ -1,3 +1,4 @@
+
 # Architecture Decisions
 
 Welcome!
@@ -5,7 +6,7 @@ Welcome!
 
 # Routing
 
-By using React Router, we can help keep the user on their page when they refresh rather than starting over
+By using React Router, we can help keep the user on their page when they refresh rather than making them start over.
 
 # Style Library
 
@@ -27,6 +28,10 @@ There is no security at the moment since there is no authentication/authorizatio
 
 A ```v1``` route is used to designate that is is the first version of my mock REST API. This is written using Firebase Functions and Typescript is used throughout.
 
-## Testing
+# Testing
 
 To show some of my testing abilities, I have added testing for the Currency.service.js file. To run the tests run ```npm run lint```
+
+# Mobile Responsiveness
+
+By taking advantage of the @media CSS selector, the app is usable on a mobile device as well as on a laptop or desktop computer.
