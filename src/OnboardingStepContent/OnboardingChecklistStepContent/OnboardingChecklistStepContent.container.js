@@ -34,6 +34,12 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     display: 'flex',
     marginBottom: theme.spacing(2)
+  },
+  '@media (max-width: 560px)': {
+    bottomText: {
+      textAlign: 'left',
+      paddingBottom: theme.spacing(1)
+    }
   }
 }));
 
@@ -213,10 +219,10 @@ export default function OnboardingChecklistStepContent(props) {
           </React.Fragment>
         ))
       }
-      <Typography variant="h6" component="h1" className={classes.instructions}>Your budget range: {props.user.budget.prettyMin()} - {props.user.budget.prettyMax()}</Typography>
+      <Typography variant="h6" component="h1" className={classes.bottomText}>Your budget range: {props.user.budget.prettyMin()} - {props.user.budget.prettyMax()}</Typography>
       {
         selectedItems.length ? (
-          <Typography variant="h6" component="h1" className={classes.instructions}>Price range for your selection: {selectedItemsPriceRange()}</Typography>
+          <Typography variant="h6" component="h1" className={classes.bottomText}>Price range for your selection: {selectedItemsPriceRange()}</Typography>
         ) : <div />
       }
       <br />

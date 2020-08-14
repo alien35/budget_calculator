@@ -11,13 +11,8 @@ import UserBudget from '../../classes/UserBudget.class';
 import Loading from '../../Shared/Loading.component';
 
 const useStyles = makeStyles((theme) => ({
-  instructions: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-  },
   textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1)
+    margin: theme.spacing(1)
   }
 }));
 
