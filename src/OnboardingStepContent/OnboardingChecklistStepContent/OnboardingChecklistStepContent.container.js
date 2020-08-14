@@ -127,7 +127,7 @@ export default function OnboardingChecklistStepContent(props) {
     if (isUnderBudget()) {
       return (
         <OnboardingStepChecklistAlert>
-          Looks like you can still afford more items!
+          Looks like you can still afford more items! Budget Range: {props.user.budget.prettyMin()} - {props.user.budget.prettyMax()}
         </OnboardingStepChecklistAlert>
       )
     }

@@ -1,4 +1,5 @@
 
+
 # Architecture Decisions
 
 Welcome!
@@ -18,20 +19,34 @@ Material Design additionally enforces strict rules to help you comply with ADA. 
 
 # Backend
 
-By using Firebase, I am able to quickly set up a database with the collections "items" and "users", and I can take advantage of the web SDK to quickly interact with the database. 
+By using Firebase, I am able to quickly set up a database with the collections "items" and "users", and I can take advantage of the SDK to quickly interact with the database. 
 
-## Backend Security
+## Security
 
-There is no security at the moment since there is no authentication/authorization built-in, but provided we set up such a mechanism, we could establish authorization rules for accessing data by configuring "Rules" in the Firebase console. In the case that we steer clear from Firebase's in-house authentication mechanisms, we could use JWT tokens in either an Authorization Grant code flow or an Implicit Grant code flow as described in the OAuth2.0 specification.
+Direct read/write to the database is prohibited and only enabled for the service account that resides in the Cloud Functions. Thee is no authentication/authorization system built-in, but provided we set up such a mechanism, we could establish authorization rules for accessing data by configuring "Rules" in the Firebase console. In the case that we steer clear from Firebase's in-house authentication mechanisms, we could use JWT tokens in either an Authorization Grant code flow or an Implicit Grant code flow (not recommended unless targeting IE) as described in the OAuth2.0 specification.
 
-## Backend Functions
+## Backend Cloud Functions
 
-A ```v1``` route is used to designate that this is the first version of my mock REST API. This is written using Firebase Functions and Typescript is used throughout.
+A ```v1``` route is used to designate that this is the first version of my mock REST API. This is written using Firebase Functions and Typescript is used throughout. The advantage of using serverless functions is that you don't have to maintain your own server and can focus your time on the business problems.
 
 # Testing
 
-To show some of my testing abilities, I have added testing for the Currency.service.js file. To run the tests run ```npm run lint```
+I have added testing for the Currency.service.js file's ```convertToDollars``` function. To run the tests run ```npm run lint```
 
 # Mobile Responsiveness
 
 By taking advantage of the @media CSS selector, the app is usable on a mobile device as well as on a laptop or desktop computer.
+
+# Hosting
+
+Firebase Hosting is used to provide you with the simplest approach to spinning up the final product. To view a version of
+the app running locally, ensure your Node.js version is at 10.13.0 or higher and run ```npm start```. Since the backend is serverless, no additional steps are needed.
+
+# Room for improvement
+
+- CORS could be set up for greater security.
+- The app could be a bit more responsive on the mobile front
+- The loading screen triggers twice when going from budget to checklist. I would move that component to a higher level to create a smoother experience
+- "Optimistic UI", or the approach of rendering things with the expectation that the API data will match the results you pre-rendered could've been used, in this case for fetching the checklist items, to shorten the duration of the first loading screen.
+- Error handling could use its own popup component rather than using the browser's un-stylized alert feature.
+- The input for min/max where keystrokes push values from the right exclusively is a bit counterintuitive but was the best solution I could find in this short time to meet the requirement of formatting numbers in US currency. I imagine there is a good library for that somewhere.

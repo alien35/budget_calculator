@@ -1,6 +1,7 @@
-import UserBudget from '../classes/UserBudget.class';
 import ChecklistItem from '../classes/ChecklistItem.class';
 
+// Serializing is an important approach
+// to transfer data to the store
 function serialize(data) {
   return {
     budget: {
@@ -11,6 +12,11 @@ function serialize(data) {
   }
 }
 
+
+// Deserializing is a good approach
+// to convert raw JSON from the server
+// into an object that can both store the data and
+// have its own functions
 function deserialize(data) {
   return new ChecklistItem(
     data.id,
@@ -19,10 +25,6 @@ function deserialize(data) {
     data.lowPrice,
     data.highPrice
   );
-}
-
-function update(data) {
-
 }
 
 export default {
