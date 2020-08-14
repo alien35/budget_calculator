@@ -1,3 +1,4 @@
+/*
 import { firestore } from 'firebase/app'
 import 'firebase/firestore';
 
@@ -123,3 +124,4 @@ export default async () => {
     )
   );
 }
+*/
