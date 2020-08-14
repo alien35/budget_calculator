@@ -1,19 +1,8 @@
 import React from 'react';
-import * as firebase from 'firebase/app';
-import ChecklistItem from '../../classes/ChecklistItem.class';
-import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
 import _ from 'lodash';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import ImageConstants from '../../constants/Image.constants';
-import ImageComponent from '../../Shared/Image.component';
 import Loading from '../../Shared/Loading.component';
 import OnboardingStepTitle from '../../Shared/OnboardingStep/OnboardingStepTitle.component';
 import OnboardingStepSubtitle from '../../Shared/OnboardingStep/OnboardingStepSubtitle.component';
@@ -25,6 +14,7 @@ import endpointsConstants from '../../constants/endpoints.constants';
 import UserService from '../../Services/User.service';
 import ChecklistItemService from '../../Services/ChecklistItem.service';
 import checklistTypeToPrettyType from '../../constants/checklistTypeToPrettyType.constants';
+import OnboardingStepChecklistAlert from '../../Shared/OnboardingStep/OnboardingStepChecklistAlert.component';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,9 +29,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center'
-  },
-  overBudgetMessage: {
-    color: 'blue'
   },
   itemTypeTitle: {
     width: '100%',
@@ -160,29 +147,23 @@ export default function OnboardingChecklistStepContent(props) {
   const getBudgetHelperText = () => {
     if (!selectedItems.length) {
       return (
-        <>
-          <Typography variant="h6" component="h1" className={classes.overBudgetMessage}>Please select at least one item before continuing.</Typography>
-          <br />
-          <br />
-        </>
+        <OnboardingStepChecklistAlert>
+          Please select at least one item before continuing.
+        </OnboardingStepChecklistAlert>
       )
     }
     if (isOverBudget()) {
       return (
-        <>
-          <Typography variant="h6" component="h1" className={classes.overBudgetMessage}>You are over budget. Please consider either removing some items or adjusting your budget range.</Typography>
-          <br />
-          <br />
-        </>
+        <OnboardingStepChecklistAlert>
+          You are over-budget. Please consider either removing some items or adjusting your budget range.
+        </OnboardingStepChecklistAlert>
       )
     }
     if (isUnderBudget()) {
       return (
-        <>
-          <Typography variant="h6" component="h1" className={classes.overBudgetMessage}>Looks like you can still afford more items!</Typography>
-          <br />
-          <br />
-        </>
+        <OnboardingStepChecklistAlert>
+          Looks like you can still afford more items!
+        </OnboardingStepChecklistAlert>
       )
     }
   }
@@ -234,9 +215,9 @@ export default function OnboardingChecklistStepContent(props) {
       }
       <Typography variant="h6" component="h1" className={classes.instructions}>Your budget range: {props.user.budget.prettyMin()} - {props.user.budget.prettyMax()}</Typography>
       {
-        selectedItems.length && (
+        selectedItems.length ? (
           <Typography variant="h6" component="h1" className={classes.instructions}>Price range for your selection: {selectedItemsPriceRange()}</Typography>
-        )
+        ) : <div />
       }
       <br />
       <br />
