@@ -8,6 +8,7 @@ import ApiService from '../Services/Api.service';
 import UserService from '../Services/User.service';
 import Loading from '../Shared/Loading.component';
 import endpointsConstants from '../constants/endpoints.constants';
+import { withRouter } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   contentWrapper: {
@@ -22,18 +23,25 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function HomeContainer(props) {
+const getActiveStep = (currentStage) => {
+  const allSteps = StepsService.getSteps();
+  return allSteps.map((step) => step.path).indexOf(currentStage);
+}
+
+function HomeContainer(props) {
 
   const [ user, setUser ] = React.useState({
     finishedFetching: false,
     result: null
   });
-  const [ activeStep, setActiveStep ] = React.useState(0);
+  const [ activeStep, setActiveStep ] = React.useState(getActiveStep(props.history.location.pathname));
 
   React.useEffect(() => {
-    fetchUser();
-    
-  }, [])
+    if (!user.finishedFetching) {
+      fetchUser();
+    }
+    setActiveStep(getActiveStep(props.history.location.pathname));
+  }, [props.history.location.pathname])
 
   const fetchUser = async () => {
     let result;
@@ -91,3 +99,5 @@ export default function HomeContainer(props) {
     </div>
   )
 }
+
+export default withRouter(HomeContainer);
