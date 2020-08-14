@@ -8,6 +8,7 @@ import ApiService from '../../Services/Api.service';
 import endpointsConstants from '../../constants/endpoints.constants';
 import UserService from '../../Services/User.service';
 import UserBudget from '../../classes/UserBudget.class';
+import Loading from '../../Shared/Loading.component';
 
 const useStyles = makeStyles((theme) => ({
   instructions: {
@@ -26,6 +27,8 @@ export default function OnboardingBudgetStepContent(props) {
 
   const [ min, setMin ] = React.useState(props.user.budget.min);
   const [ max, setMax ] = React.useState(props.user.budget.max);
+
+  const [ isLoading, setIsLoading ] = React.useState(false);
   
   const classes = useStyles();
 
@@ -50,6 +53,7 @@ export default function OnboardingBudgetStepContent(props) {
   }
 
   const onComplete = async () => {
+    setIsLoading(true);
     try {
       await storeInDB(min, max);
     } catch (err) {
@@ -58,6 +62,14 @@ export default function OnboardingBudgetStepContent(props) {
       return;
     }
     props.onComplete();
+    setIsLoading(false);
+  }
+
+  if (isLoading) {
+    // We rendering this here to not obstruct the
+    // UI events occuring in the background
+    // so we can provide a smooth experience
+    return <Loading />
   }
 
   return (

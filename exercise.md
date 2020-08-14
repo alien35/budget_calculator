@@ -21,8 +21,12 @@ By using Firebase, I am able to quickly set up a database with the collections "
 
 ## Backend Security
 
-There is no security at the moment since there is no authentication/authorization built-in, but provided we set up such a mechanism, we could establish authorization rules for accessing data by configuring "Rules" in the Firebase console.
+There is no security at the moment since there is no authentication/authorization built-in, but provided we set up such a mechanism, we could establish authorization rules for accessing data by configuring "Rules" in the Firebase console. In the case that we steer clear from Firebase's in-house authentication mechanisms, we could use JWT tokens in either an Authorization Grant code flow or an Implicit Grant code flow as described in the OAuth2.0 specification.
 
 ## Backend Functions
 
-While a custom REST API was not necessary since I could just interact with the Firebase SDK. I do provide a cloud function that seeds the database. It is written in Typescript per instructions. The advantage of Typescript is you can prevent bugs by enforcing what a data object can look like at any given moment. Classes written with Typescript further provide the benefit of serving as a reference guide.
+A ```v1``` route is used to designate that is is the first version of my mock REST API. This is written using Firebase Functions and Typescript is used throughout.
+
+## Testing
+
+To show some of my testing abilities, I have added testing for the Currency.service.js file. To run the tests run ```npm run lint```

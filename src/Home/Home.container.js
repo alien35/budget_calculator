@@ -6,9 +6,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import StepsService from '../Services/Steps.service';
 import ApiService from '../Services/Api.service';
 import UserService from '../Services/User.service';
+import Loading from '../Shared/Loading.component';
 import endpointsConstants from '../constants/endpoints.constants';
-import Backdrop from '@material-ui/core/Backdrop';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles((theme) => ({
   contentWrapper: {
@@ -20,12 +19,7 @@ const useStyles = makeStyles((theme) => ({
     // Use "rem" in order to ensure
     // expected responsiveness on mobile devices
     maxWidth: '50rem'
-  },
-  backdrop: {
-    zIndex: theme.zIndex.drawer + 1,
-    color: '#fff',
   }
-  // ^^ NOTE: this is reused elsewhere. Make it a single component
 }));
 
 export default function HomeContainer(props) {
@@ -66,9 +60,7 @@ export default function HomeContainer(props) {
 
   if (!user.finishedFetching) {
     return (
-      <Backdrop className={classes.backdrop} open={true}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
+      <Loading />
     )
   }
 

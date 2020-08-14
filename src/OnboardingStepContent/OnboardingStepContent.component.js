@@ -10,8 +10,6 @@ import StepsService from '../Services/Steps.service';
 
 function OnboardingStepContent(props) {
 
-  console.log(props.history.location, 'props.history.location')
-
   const proceedToNext = () => {
     const currentStage = props.history.location.pathname;
     const allSteps = StepsService.getSteps();
@@ -32,12 +30,14 @@ function OnboardingStepContent(props) {
         <OnboardingBudgetStepContent
           user={props.user}
           goBack={goBack}
+          isLoading={props.isLoading}
           onComplete={proceedToNext}
         />
       </Route>
       <Route exact path="/checklist">
         <OnboardingChecklistStepContent
           handleBack={goBack}
+          isLoading={props.isLoading}
           onComplete={proceedToNext}
           user={props.user}
         />

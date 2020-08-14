@@ -14,12 +14,11 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import ImageConstants from '../../constants/Image.constants';
 import ImageComponent from '../../Shared/Image.component';
+import Loading from '../../Shared/Loading.component';
 import OnboardingStepTitle from '../../Shared/OnboardingStep/OnboardingStepTitle.component';
 import OnboardingStepSubtitle from '../../Shared/OnboardingStep/OnboardingStepSubtitle.component';
 import OnboardingChecklistStepContentItem from './OnboardingChecklistStepContentItem.component';
 import OnboardingStepNavBtns from '../../Shared/OnboardingStep/OnboardingStepNavBtns.component';
-import Backdrop from '@material-ui/core/Backdrop';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import CurrencyService from '../../Services/Currency.service';
 import ApiService from '../../Services/Api.service';
 import endpointsConstants from '../../constants/endpoints.constants';
@@ -48,22 +47,16 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     display: 'flex',
     marginBottom: theme.spacing(2)
-  },
-  backdrop: {
-    zIndex: theme.zIndex.drawer + 1,
-    color: '#fff',
   }
 }));
 
 export default function OnboardingChecklistStepContent(props) {
   const classes = useStyles();
 
-  const [ db ] = React.useState(firebase.firestore());
-
-  console.log(props.user.selectedItems, 'props.user.selectedItems')
   // track selection by ID
   const [ selectedItems, setSelectedItems ] = React.useState(props.user.selectedItems);
-
+  const [ isLoading, setIsLoading ] = React.useState(false);
+ 
   const [ items, setItems ] = React.useState({
     finishedFetched: false,
     groupedResult: null,
@@ -92,8 +85,6 @@ export default function OnboardingChecklistStepContent(props) {
     })
   
   }
-
-  console.log(items, 'items')
 
   React.useState(() => {
     fetchItems();
@@ -137,18 +128,18 @@ export default function OnboardingChecklistStepContent(props) {
   }
 
   const onComplete = async () => {
+    setIsLoading(true);
     try {
       await storeInDB(selectedItems);
     } catch (err) {
-      console.log(err, 'err here')
       alert('Something went wrong. Please try again later');
       return;
     }
     props.onComplete();
+    setIsLoading(false);
   }
 
   const isOverBudget = () => {
-    console.log(selectedItemsMaxPrice(), 'hello', props.user.budget.max)
     return props.user.budget.max < selectedItemsMinPrice();
   }
 
@@ -185,18 +176,29 @@ export default function OnboardingChecklistStepContent(props) {
         </>
       )
     }
-    // Looks like you can still afford more items!
+    if (isUnderBudget()) {
+      return (
+        <>
+          <Typography variant="h6" component="h1" className={classes.overBudgetMessage}>Looks like you can still afford more items!</Typography>
+          <br />
+          <br />
+        </>
+      )
+    }
   }
 
   if (!items.finishedFetching) {
     return (
-      <Backdrop className={classes.backdrop} open={true}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
+      <Loading />
     )
   }
 
-  console.log('not in the way here')
+  if (isLoading) {
+    // We rendering this here to not obstruct the
+    // UI events occuring in the background
+    // so we can provide a smooth experience
+    return <Loading />
+  }
 
   return (
     <div className={classes.container}>
