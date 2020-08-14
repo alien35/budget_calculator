@@ -10,10 +10,6 @@ export default class ChecklistItem {
     this.highPrice = highPrice;
   }
 
-  image() {
-    return ImageConstants.GROUND_COVER;
-  }
-
   prettyPriceRange() {
     return `${CurrencyService.convertToDollars(this.lowPrice)} - ${CurrencyService.convertToDollars(this.highPrice)}`;
   }

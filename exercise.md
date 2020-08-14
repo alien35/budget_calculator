@@ -26,7 +26,7 @@ There is no security at the moment since there is no authentication/authorizatio
 
 ## Backend Functions
 
-A ```v1``` route is used to designate that is is the first version of my mock REST API. This is written using Firebase Functions and Typescript is used throughout.
+A ```v1``` route is used to designate that this is the first version of my mock REST API. This is written using Firebase Functions and Typescript is used throughout.
 
 # Testing
 
